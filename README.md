@@ -81,16 +81,28 @@ git push -u origin main
 
 ## 6. Deploy Online
 
-React perlu proses *build*, jadi paling gampang deploy lewat **Vercel** atau **Netlify** (keduanya gratis dan bisa connect langsung ke GitHub):
+### Opsi A — GitHub Pages (otomatis lewat GitHub Actions, sudah disiapkan)
+
+Project ini sudah dilengkapi file `.github/workflows/deploy.yml` yang otomatis meng-build project dan mempublikasikannya setiap kali kamu `git push` ke branch `main`.
+
+Langkah aktivasi (cukup sekali):
+
+1. Buka repo kamu di GitHub → **Settings → Pages**.
+2. Di bagian **Build and deployment → Source**, pilih **GitHub Actions** (bukan "Deploy from a branch").
+3. Buka `vite.config.js`, pastikan baris `base: '/Renjana-Store/'` **sama persis** dengan nama repo kamu di GitHub (huruf besar/kecil berpengaruh).
+4. `git add . && git commit -m "Setup GitHub Pages" && git push`.
+5. Buka tab **Actions** di repo → tunggu sampai workflow selesai (tanda centang hijau).
+6. Website akan aktif di `https://USERNAME.github.io/NAMA-REPO/`.
+
+Kalau sebelumnya kamu sempat meng-upload folder `src` mentah langsung ke GitHub Pages (tanpa lewat build), itu sebabnya halaman kosong — browser tidak bisa menjalankan file `.jsx` langsung. Dengan workflow ini, GitHub yang akan meng-*compile*-nya otomatis, kamu tidak perlu upload folder `dist` manual.
+
+> Catatan: routing halaman (`/koleksi`, `/admin`, dst) memakai `HashRouter`, jadi URL-nya akan terlihat seperti `.../#/koleksi`. Ini sengaja, supaya tetap berfungsi normal di GitHub Pages tanpa konfigurasi server tambahan.
+
+### Opsi B — Vercel / Netlify (lebih simpel untuk pengembangan lanjut)
 
 1. Buka [vercel.com](https://vercel.com) → **Add New Project** → pilih repo GitHub `renjana-store`.
-2. Saat diminta **Environment Variables**, isi:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_STORE_WHATSAPP`
-3. Klik **Deploy**. Setiap kali kamu `git push`, Vercel otomatis build & deploy ulang.
-
-(Kalau tetap ingin pakai GitHub Pages, bisa, tapi perlu setup tambahan untuk *routing* SPA — Vercel/Netlify jauh lebih simpel untuk React.)
+2. Kalau kamu memakai `.env` (bukan hardcode), isi **Environment Variables**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_STORE_WHATSAPP`.
+3. Klik **Deploy**. Setiap `git push`, otomatis build & deploy ulang, dan URL-nya bisa pakai routing normal (tanpa `#`).
 
 ## Struktur Folder
 
