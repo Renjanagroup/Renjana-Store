@@ -6,8 +6,6 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import { CartProvider } from './context/CartContext.jsx'
 import './index.css'
 
-// HashRouter dipakai (bukan BrowserRouter) supaya routing tetap berfungsi
-// di GitHub Pages, yang tidak mendukung server-side rewrite untuk SPA.
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <HashRouter>
