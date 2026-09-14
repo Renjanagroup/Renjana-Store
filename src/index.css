@@ -258,6 +258,22 @@ button{cursor:pointer;}
 .status-dikirim{border-color:var(--plum); background:#F3E4E8;}
 .status-selesai{border-color:var(--sage); background:#E9EDE4;}
 .status-dibatalkan{border-color:#8C8478; background:#EAE7E1;}
+.payment-menunggu_verifikasi{border-color:#B08D2A; background:#FBF3DC;}
+.payment-dibayar{border-color:var(--sage); background:#E9EDE4;}
+.payment-ditolak{border-color:var(--plum); background:#F3E4E8;}
+
+.payment-info{background:var(--sand); border:1px solid var(--line); border-radius:3px; padding:16px;}
+.payment-box{
+  margin-top:10px; padding:14px; background:var(--paper); border:1px dashed var(--line);
+  border-radius:2px; font-size:0.95rem;
+}
+.payment-number{font-size:1.3rem; font-family:'Fraunces', serif; margin:4px 0;}
+
+.order-shipping{
+  font-size:0.85rem; color:#4A423C; background:var(--sand); border-radius:2px;
+  padding:10px 12px; margin-bottom:12px; display:flex; flex-direction:column; gap:4px;
+}
+.order-payment-row{display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;}
 
 .admin-products{display:grid; grid-template-columns:1fr 1.2fr; gap:40px; align-items:start;}
 .product-form{

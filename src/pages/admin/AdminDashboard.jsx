@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../supabaseClient'
 
 const STATUS_OPTIONS = ['pending', 'diproses', 'dikirim', 'selesai', 'dibatalkan']
+const PAYMENT_OPTIONS = ['menunggu_verifikasi', 'dibayar', 'ditolak']
 
 function formatRupiah(n) {
   return 'Rp' + Number(n).toLocaleString('id-ID')
@@ -29,7 +30,6 @@ export default function AdminDashboard() {
 
     loadOrders()
 
-    // Berlangganan perubahan real-time pada tabel orders
     const channel = supabase
       .channel('orders-realtime')
       .on(
@@ -37,15 +37,9 @@ export default function AdminDashboard() {
         { event: '*', schema: 'public', table: 'orders' },
         (payload) => {
           setOrders((prev) => {
-            if (payload.eventType === 'INSERT') {
-              return [payload.new, ...prev]
-            }
-            if (payload.eventType === 'UPDATE') {
-              return prev.map((o) => (o.id === payload.new.id ? payload.new : o))
-            }
-            if (payload.eventType === 'DELETE') {
-              return prev.filter((o) => o.id !== payload.old.id)
-            }
+            if (payload.eventType === 'INSERT') return [payload.new, ...prev]
+            if (payload.eventType === 'UPDATE') return prev.map((o) => (o.id === payload.new.id ? payload.new : o))
+            if (payload.eventType === 'DELETE') return prev.filter((o) => o.id !== payload.old.id)
             return prev
           })
         }
@@ -61,6 +55,27 @@ export default function AdminDashboard() {
   async function updateStatus(id, status) {
     const { error } = await supabase.from('orders').update({ status }).eq('id', id)
     if (error) alert('Gagal mengubah status: ' + error.message)
+  }
+
+  async function updatePaymentStatus(id, payment_status) {
+    const { error } = await supabase.from('orders').update({ payment_status }).eq('id', id)
+    if (error) alert('Gagal mengubah status pembayaran: ' + error.message)
+  }
+
+  async function viewProof(path) {
+    if (!path) {
+      alert('Tidak ada bukti pembayaran untuk pesanan ini.')
+      return
+    }
+    const { data, error } = await supabase.storage
+      .from('payment-proofs')
+      .createSignedUrl(path, 300) // link berlaku 5 menit
+
+    if (error) {
+      alert('Gagal membuka bukti pembayaran: ' + error.message)
+      return
+    }
+    window.open(data.signedUrl, '_blank')
   }
 
   return (
@@ -84,11 +99,35 @@ export default function AdminDashboard() {
                 </div>
                 <span className="order-total">{formatRupiah(order.total)}</span>
               </div>
+
               <ul className="order-items">
                 {(order.items || []).map((item, idx) => (
                   <li key={idx}>{item.name} × {item.qty}</li>
                 ))}
               </ul>
+
+              {(order.shipping_phone || order.shipping_address) && (
+                <div className="order-shipping">
+                  <div><strong>HP:</strong> {order.shipping_phone || '-'}</div>
+                  <div><strong>Alamat:</strong> {order.shipping_address || '-'}</div>
+                </div>
+              )}
+
+              <div className="order-payment-row">
+                <button type="button" className="mini-btn" onClick={() => viewProof(order.payment_proof_path)}>
+                  Lihat Bukti Bayar
+                </button>
+                <select
+                  value={order.payment_status}
+                  onChange={(e) => updatePaymentStatus(order.id, e.target.value)}
+                  className={`status-select payment-${order.payment_status}`}
+                >
+                  {PAYMENT_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="order-row-foot">
                 <span className="order-date">
                   {new Date(order.created_at).toLocaleString('id-ID')}
