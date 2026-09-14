@@ -96,7 +96,7 @@ Langkah aktivasi (cukup sekali):
 
 Kalau sebelumnya kamu sempat meng-upload folder `src` mentah langsung ke GitHub Pages (tanpa lewat build), itu sebabnya halaman kosong — browser tidak bisa menjalankan file `.jsx` langsung. Dengan workflow ini, GitHub yang akan meng-*compile*-nya otomatis, kamu tidak perlu upload folder `dist` manual.
 
-> Catatan: routing halaman (`/koleksi`, `/admin`, dst) memakai `HashRouter`, jadi URL-nya akan terlihat seperti `.../#/koleksi`. Ini sengaja, supaya tetap berfungsi normal di GitHub Pages tanpa konfigurasi server tambahan.
+> Catatan: routing halaman (`/koleksi`, `/admin`, dst) memakai `BrowserRouter` biasa (URL bersih, tanpa `#`), dibantu trik `public/404.html` supaya navigasi dan refresh halaman tetap berfungsi di GitHub Pages. Ini penting karena Supabase mengirim token login lewat bagian `#` di URL saat user klik link di email — kalau routing juga pakai `#` (HashRouter), keduanya akan bentrok dan proses login gagal.
 
 ### Opsi B — Vercel / Netlify (lebih simpel untuk pengembangan lanjut)
 
