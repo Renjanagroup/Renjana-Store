@@ -5,11 +5,12 @@ import logo from '../assets/logo.png'
 
 export default function Navbar() {
   const { user, isAdmin, signOut } = useAuth()
-  const { count, open } = useCart()
+  const { count, open, clearCart } = useCart()
   const navigate = useNavigate()
 
   async function handleSignOut() {
     await signOut()
+    clearCart() // keranjang tidak boleh terbawa ke akun berikutnya
     navigate('/')
   }
 
