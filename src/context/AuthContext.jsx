@@ -4,58 +4,70 @@ import { supabase } from '../supabaseClient'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(undefined) // undefined = belum dicek, null = tidak login
+  const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [initializing, setInitializing] = useState(true)
+
+  async function loadProfile(userId) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (error) {
+      console.error('Gagal memuat profil:', error.message)
+      return null
+    }
+    return data
+  }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-    })
+    let mounted = true
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
+    async function init() {
+      const { data: { session: initialSession } } = await supabase.auth.getSession()
+      if (!mounted) return
 
-    return () => listener.subscription.unsubscribe()
-  }, [])
+      setSession(initialSession)
 
-  useEffect(() => {
-    let active = true
-
-    async function loadProfile() {
-      if (!session?.user) {
-        setProfile(null)
-        setLoading(false)
-        return
+      if (initialSession?.user) {
+        const p = await loadProfile(initialSession.user.id)
+        if (mounted) setProfile(p)
       }
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single()
 
-      if (active) {
-        if (error) console.error('Gagal memuat profil:', error.message)
-        setProfile(data ?? null)
-        setLoading(false)
-      }
+      if (mounted) setInitializing(false)
     }
 
-    if (session !== undefined) loadProfile()
+    init()
+
+    // Catatan penting: event ini juga terpicu saat tab browser difokuskan lagi
+    // (Supabase otomatis mengecek/refresh token). Supaya tidak membuat
+    // halaman "reset" tiap kali itu terjadi, kita HANYA memperbarui data di
+    // belakang layar di sini, TANPA menyalakan ulang status loading.
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession)
+
+      if (newSession?.user) {
+        loadProfile(newSession.user.id).then((p) => setProfile(p))
+      } else {
+        setProfile(null)
+      }
+    })
 
     return () => {
-      active = false
+      mounted = false
+      listener.subscription.unsubscribe()
     }
-  }, [session])
+  }, [])
 
   const value = {
     session,
     user: session?.user ?? null,
     profile,
     isAdmin: profile?.role === 'admin',
-    loading: session === undefined || loading,
+    // loading cuma true di pemuatan PERTAMA saja, bukan tiap ada perubahan sesi
+    loading: initializing,
     signOut: () => supabase.auth.signOut(),
   }
 
