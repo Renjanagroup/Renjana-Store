@@ -23,6 +23,7 @@ export default function Navbar() {
         <div className="nav-links">
           <Link to="/">Beranda</Link>
           <Link to="/koleksi">Koleksi</Link>
+          {user && <Link to="/profil">Profil</Link>}
           {isAdmin && <Link to="/admin">Admin</Link>}
         </div>
         <div className="nav-actions">
