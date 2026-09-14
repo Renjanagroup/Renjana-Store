@@ -306,6 +306,9 @@ button{cursor:pointer;}
 
 .page-loading{padding:120px 0; text-align:center; color:#8C8478;}
 
+.profile-layout{display:grid; grid-template-columns:0.9fr 1.1fr; gap:32px; align-items:start;}
+.order-history{background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:28px;}
+
 @media (max-width:900px){
   .hero{grid-template-columns:1fr; padding-top:48px;}
   .nav-links{display:none;}
@@ -313,4 +316,5 @@ button{cursor:pointer;}
   .about{grid-template-columns:1fr;}
   .admin-products{grid-template-columns:1fr;}
   .form-row{grid-template-columns:1fr;}
+  .profile-layout{grid-template-columns:1fr;}
 }
